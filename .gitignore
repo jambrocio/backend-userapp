@@ -1,0 +1,59 @@
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+# General additions for Java/Spring projects
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Maven target
+/target/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local Spring Boot properties (avoid committing credentials). Keep a template like application.properties.example instead.
+/src/main/resources/application.properties
+/src/main/resources/application-*.properties
+.env
+
+# build outputs
+out/
+
+# temporary files
+*.tmp
+*~
