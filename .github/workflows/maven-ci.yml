@@ -2,9 +2,8 @@
 name: Spring Boot Maven CI Pipeline
 
 # 1. Definición de Eventos
-# Este workflow se dispara en tres escenarios clave, alineados con Git Flow:
-# - push: Cada vez que se hace push a develop, main o ramas release/hotfix.
-# - pull_request: Cada vez que se abre, se sincroniza o se actualiza un PR hacia develop o main.
+# Se dispara en push a ramas principales (develop, main) y de soporte (release, hotfix).
+# Se dispara en Pull Requests (PRs) dirigidos a develop o main.
 on:
   push:
     branches: [ develop, main, 'release/**', 'hotfix/**' ]
@@ -26,17 +25,17 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
       
-    # 2. Configurar Java
-    # Instala la versión de Java que requiere tu Spring Boot (ajusta la versión si es necesario)
-    - name: Set up JDK 21
+    # 2. Configurar Java (MODIFICADO a Java 17)
+    # Instala la versión de Java 17 LTS.
+    - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
-        java-version: '21'
+        # Versión de Java requerida por tu Spring Boot
+        java-version: '17' 
         distribution: 'temurin'
         cache: 'maven' # Configurar el cache de Maven para acelerar el build
         
     # 3. Cacheo de Maven (Acelera la CI)
-    # Reutiliza las dependencias descargadas de Maven entre ejecuciones de CI.
     - name: Cache local Maven repository
       uses: actions/cache@v4
       with:
@@ -46,15 +45,11 @@ jobs:
           ${{ runner.os }}-maven-
           
     # 4. Build, Test y Empaquetado
-    # El comando 'clean install' compila el proyecto, descarga dependencias, 
-    # y ejecuta TODAS las pruebas unitarias y de integración definidas en tu proyecto.
-    # Si alguna prueba falla, el Job fallará y la fusión del PR será bloqueada.
+    # Compila, ejecuta TODAS las pruebas y genera el JAR.
     - name: Build, Test and Package with Maven
       run: mvn clean install
       
-    # 5. Guardar Artefacto (Opcional, para la siguiente etapa de CD)
-    # Si la CI pasa, guardamos el JAR/WAR generado para el despliegue posterior.
-    # Comenta estas líneas si solo quieres CI y no CD por ahora.
+    # 5. Guardar Artefacto (Opcional, para el CD)
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
