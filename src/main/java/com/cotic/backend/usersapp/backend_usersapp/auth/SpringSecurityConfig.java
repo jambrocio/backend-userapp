@@ -28,46 +28,50 @@ import jakarta.validation.constraints.NotNull;
 
 @Configuration
 public class SpringSecurityConfig {
-    
+
     @Autowired
     private AuthenticationConfiguration authenticationConfiguration;
 
     @Bean
-    PasswordEncoder passwordEncoder(){
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    AuthenticationManager authenticationManager() throws Exception{
+    AuthenticationManager authenticationManager() throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
     SecurityFilterChain securityFilterChain(@NotNull HttpSecurity security) throws Exception {
-    return security.authorizeHttpRequests((authorizeRequests) ->
-                    authorizeRequests
-                    // Allow access to OpenAPI / Swagger UI endpoints
-                    .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/swagger-ui-custom.html", "/api-docs/**", "/v3/api-docs/**", "/webjars/**").permitAll()
-                    // Allow public access to token validation endpoint
-                    .requestMatchers(HttpMethod.POST, "/users/validate-token").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/users").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/users/{id}").hasAnyRole("USER", "ADMIN")//se omite la palabra "ROLE_"
-                    .requestMatchers(HttpMethod.POST, "/users/").hasRole("ADMIN")
-                    .requestMatchers("/users/**").hasRole("ADMIN")//acceso a cualquier ruta para el role ADMIN
-                    //.requestMatchers(HttpMethod.DELETE, "/users/{id}").hasRole("ADMIN")
-                    //.requestMatchers(HttpMethod.PUT, "/users/{id}").hasRole("ADMIN")
-                    .anyRequest().authenticated())
-            .addFilter(new JwtAuthenticationFilter(authenticationConfiguration.getAuthenticationManager()))
-            .addFilter(new JwtValidationFilter(authenticationConfiguration.getAuthenticationManager()))
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement((sessionManagement) ->
-                    sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .build();
+        return security.authorizeHttpRequests((authorizeRequests) -> authorizeRequests
+                // Allow access to OpenAPI / Swagger UI endpoints
+                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/swagger-ui-custom.html", "/api-docs/**",
+                        "/v3/api-docs/**", "/webjars/**")
+                .permitAll()
+                // Allow public access to token validation endpoint
+                .requestMatchers(HttpMethod.POST, "/users/validate-token").permitAll()
+                .requestMatchers(HttpMethod.GET, "/users").permitAll()
+                .requestMatchers(HttpMethod.GET, "/users/{id}").hasAnyRole("USER", "ADMIN")// se omite la palabra
+                                                                                           // "ROLE_"
+                .requestMatchers(HttpMethod.POST, "/users/").hasRole("ADMIN")
+                .requestMatchers("/users/**").hasRole("ADMIN")// acceso a cualquier ruta para el role ADMIN
+                // .requestMatchers(HttpMethod.DELETE, "/users/{id}").hasRole("ADMIN")
+                // .requestMatchers(HttpMethod.PUT, "/users/{id}").hasRole("ADMIN")
+                .requestMatchers("/h2-console/**").permitAll()
+                .anyRequest().authenticated())
+                .addFilter(new JwtAuthenticationFilter(authenticationConfiguration.getAuthenticationManager()))
+                .addFilter(new JwtValidationFilter(authenticationConfiguration.getAuthenticationManager()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers.frameOptions().disable())
+                .sessionManagement(
+                        (sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .build();
     }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource(){
+    CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
         config.setAllowedOriginPatterns(Arrays.asList("*"));
@@ -81,8 +85,9 @@ public class SpringSecurityConfig {
     }
 
     @Bean
-    FilterRegistrationBean<CorsFilter> corsFilter(){
-        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(corsConfigurationSource()));
+    FilterRegistrationBean<CorsFilter> corsFilter() {
+        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(
+                new CorsFilter(corsConfigurationSource()));
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return bean;
     }
