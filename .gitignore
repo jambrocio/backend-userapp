@@ -47,8 +47,6 @@ build/
 Thumbs.db
 
 # Local Spring Boot properties (avoid committing credentials). Keep a template like application.properties.example instead.
-/src/main/resources/application.properties
-/src/main/resources/application-*.properties
 .env
 
 # build outputs
