@@ -5,7 +5,7 @@ Aplicación Spring Boot (Java 17) para gestión de usuarios — proyecto de ejem
 Resumen rápido
 - Spring Boot 3.4.11
 - Java 17
-- JPA (MySQL)
+- JPA (H2)
 - Seguridad: Spring Security + JWT (jjwt 0.12.x)
 - Documentación OpenAPI / Swagger: springdoc-openapi-starter-webmvc-ui
 
@@ -31,6 +31,13 @@ Cómo ejecutar (Windows / PowerShell)
 .\mvnw spring-boot:run
 ```
 
+Consola H2
+http://localhost:8082/h2-console
+
+- JDBC URL : jdbc:h2:mem:db_user_springboot
+- User Name : sa
+- Password : 
+
 Endpoints principales
 - Swagger UI (interfaz):
   - http://localhost:8082/swagger-ui-custom.html
@@ -42,6 +49,28 @@ Endpoints principales
   - GET /users/{id} — requiere rol USER o ADMIN
   - POST /users — requiere ADMIN
   - POST /users/validate-token — endpoint público para validar un JWT
+
+Generate-token
+- Ruta: POST /login
+- Body JSON: `{ "username": "admin", "password": "********" }`
+- Respuesta JSON de ejemplo (válido):
+
+```json
+{
+    "message": "Hola admin has iniciado sesion con exito!",
+    "token": "******************",
+    "username": "admin"
+}
+```
+
+Si la autenticacion no es válido:
+
+```json
+{
+    "message": "Error en la autenticacion username o password incorrecto!",
+    "error": "Credenciales erróneas"
+}
+```
 
 Validate-token
 - Ruta: POST /users/validate-token
