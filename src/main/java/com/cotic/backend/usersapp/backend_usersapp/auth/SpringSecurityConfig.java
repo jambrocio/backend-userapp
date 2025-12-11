@@ -23,14 +23,19 @@ import org.springframework.web.filter.CorsFilter;
 
 import com.cotic.backend.usersapp.backend_usersapp.auth.filters.JwtAuthenticationFilter;
 import com.cotic.backend.usersapp.backend_usersapp.auth.filters.JwtValidationFilter;
+import com.cotic.backend.usersapp.backend_usersapp.util.Constantes;
 
 import jakarta.validation.constraints.NotNull;
 
 @Configuration
 public class SpringSecurityConfig {
 
+    private final AuthenticationConfiguration authenticationConfiguration;
+
     @Autowired
-    private AuthenticationConfiguration authenticationConfiguration;
+    public SpringSecurityConfig(AuthenticationConfiguration authenticationConfiguration) {
+        this.authenticationConfiguration = authenticationConfiguration;
+    }
 
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -52,12 +57,15 @@ public class SpringSecurityConfig {
                 // Allow public access to token validation endpoint
                 .requestMatchers(HttpMethod.POST, "/users/validate-token").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users").permitAll()
-                .requestMatchers(HttpMethod.GET, "/users/{id}").hasAnyRole("USER", "ADMIN")// se omite la palabra
-                                                                                           // "ROLE_"
-                .requestMatchers(HttpMethod.POST, "/users/").hasRole("ADMIN")
-                .requestMatchers("/users/**").hasRole("ADMIN")// acceso a cualquier ruta para el role ADMIN
-                // .requestMatchers(HttpMethod.DELETE, "/users/{id}").hasRole("ADMIN")
-                // .requestMatchers(HttpMethod.PUT, "/users/{id}").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, Constantes.USER_ID).hasAnyRole(Constantes.USER, Constantes.ADMIN)// se
+                                                                                                                  // omite
+                // la
+                // palabra
+                // "ROLE_"
+                .requestMatchers(HttpMethod.POST, "/users/").hasRole(Constantes.ADMIN)
+                .requestMatchers("/users/**").hasRole(Constantes.ADMIN)// acceso a cualquier ruta para el role ADMIN
+                .requestMatchers(HttpMethod.DELETE, Constantes.USER_ID).hasRole(Constantes.ADMIN)
+                .requestMatchers(HttpMethod.PUT, Constantes.USER_ID).hasRole(Constantes.ADMIN)
                 .requestMatchers("/h2-console/**").permitAll()
                 .anyRequest().authenticated())
                 .addFilter(new JwtAuthenticationFilter(authenticationConfiguration.getAuthenticationManager()))

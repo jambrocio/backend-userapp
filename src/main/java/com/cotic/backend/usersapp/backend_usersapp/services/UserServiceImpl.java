@@ -3,7 +3,6 @@ package com.cotic.backend.usersapp.backend_usersapp.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,34 +31,34 @@ import java.util.Arrays;
 import com.cotic.backend.usersapp.backend_usersapp.repositories.UserRepository;
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository repo;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    private UserRepository repo;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public UserServiceImpl(UserRepository repo, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+        this.repo = repo;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     @Transactional(readOnly = true)
     public List<UserDto> findAll() {
         List<User> users = (List<User>) repo.findAll();
         return users
-            .stream()
-            .map(u -> DtoMapperUser.builder().setUser(u).build())
-            .collect(Collectors.toList());
+                .stream()
+                .map(u -> DtoMapperUser.builder().setUser(u).build())
+                .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<UserDto> findById(Long id) {
 
-        return repo.findById(id).map(u -> 
-            DtoMapperUser.builder().setUser(u).build()
-        );
+        return repo.findById(id).map(u -> DtoMapperUser.builder().setUser(u).build());
 
     }
 
@@ -83,7 +82,7 @@ public class UserServiceImpl implements UserService{
     public Optional<UserDto> update(UserRequest user, Long id) {
         Optional<User> o = repo.findById(id);
         User userOptional = null;
-        if(o.isPresent()){
+        if (o.isPresent()) {
             User userdb = o.orElseThrow();
             userdb.setRoles(getRoles(user));
             userdb.setUsername(user.getUsername());
@@ -95,17 +94,21 @@ public class UserServiceImpl implements UserService{
 
     /**
      * Valida un token JWT usando la clave secreta configurada.
+     * 
      * @param token el token JWT (puede incluir o no el prefijo 'Bearer ')
      * @return true si el token es válido, false si es inválido o expirado
      */
     public boolean isTokenValid(String token) {
-        if (token == null || token.isBlank()) return false;
-        String rawToken = token.startsWith(TokenJwtConfig.PREFIX_TOKEN) ? token.substring(TokenJwtConfig.PREFIX_TOKEN.length()) : token;
+        if (token == null || token.isBlank())
+            return false;
+        String rawToken = token.startsWith(TokenJwtConfig.PREFIX_TOKEN)
+                ? token.substring(TokenJwtConfig.PREFIX_TOKEN.length())
+                : token;
         try {
             Jwts.parser()
-                .verifyWith(TokenJwtConfig.SECRET_KEY)
-                .build()
-                .parseSignedClaims(rawToken);
+                    .verifyWith(TokenJwtConfig.SECRET_KEY)
+                    .build()
+                    .parseSignedClaims(rawToken);
             return true;
         } catch (SecurityException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e) {
             // Token inválido
@@ -118,6 +121,7 @@ public class UserServiceImpl implements UserService{
 
     /**
      * Valida y extrae información del token JWT.
+     * 
      * @param token token (con o sin prefijo Bearer )
      * @return TokenValidationResult con valid, username y roles (nombres)
      */
@@ -127,20 +131,22 @@ public class UserServiceImpl implements UserService{
             result.setValid(false);
             return result;
         }
-        String rawToken = token.startsWith(TokenJwtConfig.PREFIX_TOKEN) ? token.substring(TokenJwtConfig.PREFIX_TOKEN.length()) : token;
+        String rawToken = token.startsWith(TokenJwtConfig.PREFIX_TOKEN)
+                ? token.substring(TokenJwtConfig.PREFIX_TOKEN.length())
+                : token;
         try {
-            Claims claims = Jwts.parser().verifyWith(TokenJwtConfig.SECRET_KEY).build().parseSignedClaims(rawToken).getPayload();
+            Claims claims = Jwts.parser().verifyWith(TokenJwtConfig.SECRET_KEY).build().parseSignedClaims(rawToken)
+                    .getPayload();
             String username = claims.getSubject();
             Object authoritiesClaims = claims.get("authorities");
 
             List<String> roles = Arrays
-                .asList(new ObjectMapper()
-                    .addMixIn(SimpleGrantedAuthority.class, SimpleGrantedAuthorityJsonCreator.class)
-                    .readValue(authoritiesClaims.toString().getBytes(), SimpleGrantedAuthority[].class)
-                )
-                .stream()
-                .map(SimpleGrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
+                    .asList(new ObjectMapper()
+                            .addMixIn(SimpleGrantedAuthority.class, SimpleGrantedAuthorityJsonCreator.class)
+                            .readValue(authoritiesClaims.toString().getBytes(), SimpleGrantedAuthority[].class))
+                    .stream()
+                    .map(SimpleGrantedAuthority::getAuthority)
+                    .toList();
 
             result.setValid(true);
             result.setUsername(username);
@@ -152,17 +158,17 @@ public class UserServiceImpl implements UserService{
         }
     }
 
-    private List<Role> getRoles(IUser user){
+    private List<Role> getRoles(IUser user) {
         Optional<Role> ou = roleRepository.findByName("ROLE_USER");
-        
+
         List<Role> roles = new ArrayList<>();
         if (ou.isPresent()) {
             roles.add(ou.orElseThrow());
         }
 
-        if(user.isAdmin()){
+        if (user.isAdmin()) {
             Optional<Role> oa = roleRepository.findByName("ROLE_ADMIN");
-            if(oa.isPresent()){
+            if (oa.isPresent()) {
                 roles.add(oa.orElseThrow());
             }
         }

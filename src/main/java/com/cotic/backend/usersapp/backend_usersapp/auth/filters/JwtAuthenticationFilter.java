@@ -27,30 +27,27 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter{
+public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private AuthenticationManager authenticationManager;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager){
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
 
-    //attemptAuthentication = intentar autenticacion
+    // attemptAuthentication = intentar autenticacion
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
-        
+
         User user = null;
         String username = null;
         String password = null;
-        
+
         try {
             user = new ObjectMapper().readValue(request.getInputStream(), User.class);
             username = user.getUsername();
             password = user.getPassword();
-
-            //logger.info("Username desde Request InputStream (raw) " + username);
-            //logger.info("Password desde Request InputStream (raw) " + password);
         } catch (StreamReadException e) {
             e.printStackTrace();
         } catch (DatabindException e) {
@@ -67,7 +64,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
             Authentication authResult) throws IOException, ServletException {
 
-        String username = ((org.springframework.security.core.userdetails.User) authResult.getPrincipal()).getUsername();
+        String username = ((org.springframework.security.core.userdetails.User) authResult.getPrincipal())
+                .getUsername();
         Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
         boolean isAdmin = roles.stream().anyMatch(r -> r.getAuthority().equals("ROLE_ADMIN"));
 
@@ -75,25 +73,25 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .add("authorities", new ObjectMapper().writeValueAsString(roles))
                 .add("isAdmin", isAdmin)
                 .add("username", username)
-        .build();
+                .build();
 
         String token = Jwts.builder()
                 .subject(username)
-                .claims(claims)//setea valores en JWT-PAYLOAD
-                .expiration(new Date(System.currentTimeMillis() + 3600000))//token expira en 1 hora = 3600000
+                .claims(claims)// setea valores en JWT-PAYLOAD
+                .expiration(new Date(System.currentTimeMillis() + 3600000))// token expira en 1 hora = 3600000
                 .issuedAt(new Date())
                 .signWith(TokenJwtConfig.SECRET_KEY)
                 .compact();
- 
+
         response.addHeader(TokenJwtConfig.HEADER_AUTHORIZATION, TokenJwtConfig.PREFIX_TOKEN + token);
- 
+
         Map<String, String> body = new HashMap<>();
         body.put("token", token);
         body.put("username", username);
         body.put("message", String.format("Hola %s has iniciado sesion con exito!", username));
- 
+
         response.getWriter().write(new ObjectMapper().writeValueAsString(body));
-        response.setStatus(HttpStatus.OK.value());//200
+        response.setStatus(HttpStatus.OK.value());// 200
         response.setContentType("application/json");
 
     }
@@ -107,7 +105,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         body.put("error", failed.getMessage());
 
         response.getWriter().write(new ObjectMapper().writeValueAsString(body));
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());//401
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());// 401
         response.setContentType("application/json");
 
     }

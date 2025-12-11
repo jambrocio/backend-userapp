@@ -12,11 +12,15 @@ import javax.sql.DataSource;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
-    @Autowired
-    private UserRepository userRepository;
+
+    private final UserRepository userRepository;
+    private final DataSource dataSource;
 
     @Autowired
-    private DataSource dataSource;
+    public DataInitializer(UserRepository userRepository, DataSource dataSource) {
+        this.userRepository = userRepository;
+        this.dataSource = dataSource;
+    }
 
     @Override
     public void run(String... args) throws Exception {

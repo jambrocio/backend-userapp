@@ -17,24 +17,28 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cotic.backend.usersapp.backend_usersapp.repositories.UserRepository;
 
 @Service
-public class JpaUserDetailsService implements UserDetailsService{
+public class JpaUserDetailsService implements UserDetailsService {
+
+    private final UserRepository repository;
 
     @Autowired
-    private UserRepository repository;
+    public JpaUserDetailsService(UserRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<com.cotic.backend.usersapp.backend_usersapp.models.entities.User> o = repository.getUserByUsername(username);
-        if(!o.isPresent()){
+        Optional<com.cotic.backend.usersapp.backend_usersapp.models.entities.User> o = repository
+                .getUserByUsername(username);
+        if (!o.isPresent()) {
             throw new UsernameNotFoundException(String.format("Username %s no existe en el sistema!", username));
         }
 
         com.cotic.backend.usersapp.backend_usersapp.models.entities.User user = o.orElseThrow();
 
-        List<GrantedAuthority> authorities = user.getRoles().stream().map(r -> 
-            new SimpleGrantedAuthority(r.getName()))
-        .collect(Collectors.toList());
+        List<GrantedAuthority> authorities = user.getRoles().stream().map(r -> new SimpleGrantedAuthority(r.getName()))
+                .collect(Collectors.toList());
 
         return new User(user.getUsername(), user.getPassword(), true, true, true, true, authorities);
     }
