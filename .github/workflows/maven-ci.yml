@@ -63,7 +63,7 @@ jobs:
     
     steps:
     - name: Wait for Quality Gate status
-      uses: SonarSource/sonarqube-quality-gate-action@v2
+      uses: SonarSource/sonarqube-quality-gate-action@v1
       # Usar los mismos secretos que en el Job anterior
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
