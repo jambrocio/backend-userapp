@@ -41,13 +41,12 @@ jobs:
       # Ejecuta el análisis de SonarQube a través del plugin de Maven
       run: >
         mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-        -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
-        -Dsonar.token=${{ secrets.SONAR_TOKEN }}
-        # 💡 Puedes añadir más propiedades como -Dsonar.projectKey=mi-proyecto-spring
+        -Dsonar.host.url=${{ env.SONAR_HOST_URL }} # 🚨 CORRECCIÓN: De 'secrets.' a 'env.'
+        -Dsonar.token=${{ env.SONAR_TOKEN }}
+        # ...
       env:
-        # Define estas variables de entorno con los secretos de GitHub
         SONAR_HOST_URL: http://sonarqube.theshiftengine.com:9000
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # 🚨 Este es un secreto que debes configurar
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     
     - name: Upload Sonar Report Artifact
       uses: actions/upload-artifact@v4
