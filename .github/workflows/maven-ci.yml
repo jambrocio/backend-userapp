@@ -82,7 +82,8 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: spring-boot-app
-# ... (resto de los pasos de despliegue)
+
+    # ... (pasos de despliegue)
 
     # 🔑 NUEVO PASO DE SEGURIDAD: Iniciar sesión con Service Principal
     - name: Azure Login (Service Principal)
