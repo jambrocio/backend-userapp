@@ -73,6 +73,8 @@ jobs:
         name: sonar-reports
         # El path se omite, se descargará en el directorio raíz del Job,
         # lo cual es correcto para la acción de Quality Gate.
+        path: . # 🚨 Fuerza la descarga al directorio raíz
+        
     - name: Wait for Quality Gate status
       uses: SonarSource/sonarqube-quality-gate-action@v1
       # Usar los mismos secretos que en el Job anterior
