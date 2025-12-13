@@ -48,7 +48,13 @@ jobs:
         # Define estas variables de entorno con los secretos de GitHub
         SONAR_HOST_URL: http://sonarqube.theshiftengine.com:9000
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # 🚨 Este es un secreto que debes configurar
-        
+    
+    - name: Upload Sonar Report Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: sonar-reports
+        path: .scannerwork # Sube todo el directorio que contiene report-task.txt
+
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
@@ -62,6 +68,12 @@ jobs:
     needs: build_and_test # Espera a que el build y el análisis terminen
     
     steps:
+    - name: Download Sonar Report Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: sonar-reports
+        # El path se omite, se descargará en el directorio raíz del Job,
+        # lo cual es correcto para la acción de Quality Gate.
     - name: Wait for Quality Gate status
       uses: SonarSource/sonarqube-quality-gate-action@v1
       # Usar los mismos secretos que en el Job anterior
