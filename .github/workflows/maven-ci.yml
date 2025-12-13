@@ -52,7 +52,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: sonar-reports
-        path: target/sonar/.scannerwork # 🚨 RUTA CORREGIDA
+        path: target/sonar/report-task.txt # 🚨 Subimos solo el archivo clave
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
@@ -71,9 +71,8 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: sonar-reports
-        # El path se omite, se descargará en el directorio raíz del Job,
-        # lo cual es correcto para la acción de Quality Gate.
-        path: . # 🚨 Fuerza la descarga al directorio raíz
+        # Descargamos el archivo directamente al directorio .scannerwork
+        path: .scannerwork
 
     - name: Wait for Quality Gate status
       uses: SonarSource/sonarqube-quality-gate-action@v1
