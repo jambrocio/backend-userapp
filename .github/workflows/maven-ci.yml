@@ -1,0 +1,58 @@
+# Nombre del Workflow (Aparecerá en la pestaña de Actions de GitHub)
+name: Spring Boot Maven CI Pipeline
+
+# 1. Definición de Eventos
+# Se dispara en push a ramas principales (develop, main) y de soporte (release, hotfix).
+# Se dispara en Pull Requests (PRs) dirigidos a develop o main.
+on:
+  push:
+    branches: [ develop, main, 'release/**', 'hotfix/**' ]
+  pull_request:
+    # Solo nos interesa validar los PRs que van hacia develop o main.
+    branches: [ develop, main ]
+
+# Definición del Job
+jobs:
+  build_and_test:
+    # Este nombre es el que debes seleccionar en las Reglas de Protección (Rulesets)
+    name: Build & Test Application
+    runs-on: ubuntu-latest # Ejecutar el job en un ambiente Linux estándar
+
+    steps:
+    
+    # 1. Checkout del Código
+    # Obtiene la copia del repositorio en la máquina virtual.
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      
+    # 2. Configurar Java (MODIFICADO a Java 17)
+    # Instala la versión de Java 17 LTS.
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        # Versión de Java requerida por tu Spring Boot
+        java-version: '17' 
+        distribution: 'temurin'
+        cache: 'maven' # Configurar el cache de Maven para acelerar el build
+        
+    # 3. Cacheo de Maven (Acelera la CI)
+    - name: Cache local Maven repository
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+          
+    # 4. Build, Test y Empaquetado
+    # Compila, ejecuta TODAS las pruebas y genera el JAR.
+    - name: Build, Test and Package with Maven
+      run: mvn clean install
+      
+    # 5. Guardar Artefacto (Opcional, para el CD)
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: spring-boot-app
+        # Ajusta el path si tu JAR no se genera en target/
+        path: target/*.jar
