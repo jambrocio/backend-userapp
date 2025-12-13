@@ -41,9 +41,9 @@ jobs:
       # Ejecuta el análisis de SonarQube a través del plugin de Maven
       run: >
         mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-        -Dsonar.host.url=${{ env.SONAR_HOST_URL }} # 🚨 CORRECCIÓN: De 'secrets.' a 'env.'
+        -Dsonar.host.url=${{ env.SONAR_HOST_URL }} # 🚨 Debe ser ENV.
         -Dsonar.token=${{ env.SONAR_TOKEN }}
-        # ...
+        # 💡 Puedes añadir más propiedades como -Dsonar.projectKey=mi-proyecto-spring
       env:
         SONAR_HOST_URL: http://sonarqube.theshiftengine.com:9000
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -52,7 +52,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: sonar-reports
-        path: .scannerwork # Sube todo el directorio que contiene report-task.txt
+        path: target/sonar/.scannerwork # 🚨 RUTA CORREGIDA
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
@@ -74,7 +74,7 @@ jobs:
         # El path se omite, se descargará en el directorio raíz del Job,
         # lo cual es correcto para la acción de Quality Gate.
         path: . # 🚨 Fuerza la descarga al directorio raíz
-        
+
     - name: Wait for Quality Gate status
       uses: SonarSource/sonarqube-quality-gate-action@v1
       # Usar los mismos secretos que en el Job anterior
