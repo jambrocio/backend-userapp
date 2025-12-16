@@ -50,6 +50,17 @@ public class SpringSecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(@NotNull HttpSecurity security) throws Exception {
         return security.authorizeHttpRequests((authorizeRequests) -> authorizeRequests
+
+                // =================================================================
+                // 1. CONFIGURACIÓN DE ACTUATOR
+                // =================================================================
+                // Permite acceso público a Health e Info para monitoreo externo
+                // .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                // Restringe todos los demás endpoints de Actuator al rol ADMIN
+                // .requestMatchers("/actuator/**").hasRole(Constantes.ADMIN)
+                .requestMatchers("/actuator/**").permitAll()
+                // =================================================================
+
                 // Allow access to OpenAPI / Swagger UI endpoints
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/swagger-ui-custom.html", "/api-docs/**",
                         "/v3/api-docs/**", "/webjars/**")
